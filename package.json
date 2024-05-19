@@ -5,9 +5,8 @@
   "main": "src/main.tsx",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc src/main.tsx",
     "fmt": "pnpm exec prettier . --write",
-    "run": "pnpm build && node src/main.js",
+    "execute": "pnpm esrun src/main.tsx",
     "postinstall": "papi",
     "update-types": "papi add fellowship -w wss://polkadot-collectives-rpc.polkadot.io && papi generate"
   },
