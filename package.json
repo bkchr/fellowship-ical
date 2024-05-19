@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc src/main.tsx",
+    "fmt": "pnpm exec prettier . --write",
     "run": "pnpm build && node src/main.js",
     "postinstall": "papi",
     "update-types": "papi add fellowship -w wss://polkadot-collectives-rpc.polkadot.io && papi generate"
@@ -18,5 +19,8 @@
     "esrun": "^3.2.26",
     "ical-generator": "^7.1.0",
     "polkadot-api": "^0.7.2"
+  },
+  "devDependencies": {
+    "prettier": "3.2.5"
   }
 }
