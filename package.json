@@ -1,0 +1,22 @@
+{
+  "name": "fellowship-ical",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/main.tsx",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc src/main.tsx",
+    "run": "pnpm build && node src/main.js",
+    "postinstall": "papi",
+    "update-types": "papi add fellowship -w wss://polkadot-collectives-rpc.polkadot.io && papi generate"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@types/node": "^20.12.12",
+    "esrun": "^3.2.26",
+    "ical-generator": "^7.1.0",
+    "polkadot-api": "^0.7.2"
+  }
+}
