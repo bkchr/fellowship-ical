@@ -49,34 +49,33 @@ http.createServer(async (req, res) => {
     const calendar = ical({ name: "Fellowship Calendar" });
 
     // get the value for an account
-    const accountInfo = await Promise.all([
-        fellowshipApi.query.FellowshipSalary.Claimant.getValue(
-            "13fvj4bNfrTo8oW6U8525soRp6vhjAFLum6XBdtqq9yP22E7",
-        ),
-        fellowshipApi.query.FellowshipSalary.Status.getValue(),
-    ]);
+    const salaryStatus =
+        await fellowshipApi.query.FellowshipSalary.Status.getValue();
+    let currentCycleStart = salaryStatus.cycle_start;
+    const registrationPeriod =
+        await fellowshipApi.constants.FellowshipSalary.RegistrationPeriod();
+    const payoutPeriod =
+        await fellowshipApi.constants.FellowshipSalary.PayoutPeriod();
 
-    const sinceCycleStart = finalizedBlock.number - accountInfo[1].cycle_start;
+    for (let cycle = 0; cycle < 12; cycle++) {
+        calendar.createEvent({
+            allDay: true,
+            start: blockToDate(currentCycleStart),
+            end: blockToDate(currentCycleStart + registrationPeriod),
+            summary: "Salary Registration",
+        });
 
-    console.log(accountInfo);
-    console.log(sinceCycleStart);
-    console.log(blockToDate(accountInfo[1].cycle_start));
+        calendar.createEvent({
+            allDay: true,
+            start: blockToDate(currentCycleStart + registrationPeriod),
+            end: blockToDate(
+                currentCycleStart + registrationPeriod + payoutPeriod,
+            ),
+            summary: "Payout Registration",
+        });
 
-    const end = blockToDate(
-        accountInfo[1].cycle_start +
-            Number(fellowshipApi.constants.FellowshipSalary.RegistrationPeriod),
-    );
-
-    console.log(end);
-
-    calendar.createEvent({
-        allDay: true,
-        start: blockToDate(accountInfo[1].cycle_start),
-        end: blockToDate(
-            accountInfo[1].cycle_start +
-                (await fellowshipApi.constants.FellowshipSalary.RegistrationPeriod()),
-        ),
-    });
+        currentCycleStart += registrationPeriod + payoutPeriod;
+    }
 
     res.end(calendar.toString());
 }).listen(3000, "127.0.0.1", () => {
