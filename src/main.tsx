@@ -24,18 +24,18 @@ const finalizedTimestamp = await fellowshipApi.query.Timestamp.Now.getValue({
 
 function blockToDate(block: number): Date {
     if (block >= finalizedBlock.number) {
-        console.log((block - finalizedBlock.number) * 12 * 1000);
         return new Date(
-            Number(finalizedTimestamp) +
-                (block - finalizedBlock.number) * 12 * 1000,
+            new Date(
+                Number(finalizedTimestamp) +
+                    (block - finalizedBlock.number) * 12 * 1000,
+            ).toDateString(),
         );
     } else {
-        console.log("finalized" + finalizedBlock.number);
-        console.log("block" + block);
-
         return new Date(
-            Number(finalizedTimestamp) -
-                (finalizedBlock.number - block) * 12 * 1000,
+            new Date(
+                Number(finalizedTimestamp) -
+                    (finalizedBlock.number - block) * 12 * 1000,
+            ).toDateString(),
         );
     }
 }
@@ -76,6 +76,55 @@ http.createServer(async (req, res) => {
 
         currentCycleStart += registrationPeriod + payoutPeriod;
     }
+
+    const [coreParams, memberStatus, memberRank] = await Promise.all([
+        fellowshipApi.query.FellowshipCore.Params.getValue(),
+        fellowshipApi.query.FellowshipCore.Member.getValue(
+            "13fvj4bNfrTo8oW6U8525soRp6vhjAFLum6XBdtqq9yP22E7",
+        ),
+        fellowshipApi.query.FellowshipCollective.Members.getValue(
+            "13fvj4bNfrTo8oW6U8525soRp6vhjAFLum6XBdtqq9yP22E7",
+        ),
+    ]);
+
+    let timeout;
+    let approachSummary;
+    let happenedSummary;
+
+    if (memberRank == 0) {
+        timeout = coreParams.offboard_timeout;
+        approachSummary = "Offboarding approaching";
+        happenedSummary = "Offboarded?";
+    } else {
+        timeout = coreParams.demotion_period[memberRank - 1];
+        approachSummary = "Demotion approaching";
+        happenedSummary = "Demoted?";
+    }
+
+    let offboardDate = blockToDate(memberStatus.last_proof + timeout);
+    offboardDate.setDate(offboardDate.getDate() + 1);
+    console.log("offboard " + offboardDate.toISOString());
+
+    let offboardEventStart = new Date(offboardDate);
+    offboardEventStart.setDate(offboardEventStart.getDate() - 7 * 4);
+
+    calendar.createEvent({
+        allDay: true,
+        start: offboardEventStart,
+        end: offboardDate,
+        summary: approachSummary,
+    });
+
+    let oneDayAfter = new Date(offboardDate);
+    oneDayAfter.setDate(offboardDate.getDate() + 1);
+    console.log("one day after " + oneDayAfter.toISOString());
+
+    calendar.createEvent({
+        allDay: true,
+        start: offboardDate,
+        end: oneDayAfter,
+        summary: happenedSummary,
+    });
 
     res.end(calendar.toString());
 }).listen(3000, "127.0.0.1", () => {
