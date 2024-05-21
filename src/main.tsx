@@ -102,9 +102,6 @@ http.createServer(async (req, res) => {
     }
 
     let offboardDate = blockToDate(memberStatus.last_proof + timeout);
-    offboardDate.setDate(offboardDate.getDate() + 1);
-    console.log("offboard " + offboardDate.toISOString());
-
     let offboardEventStart = new Date(offboardDate);
     offboardEventStart.setDate(offboardEventStart.getDate() - 7 * 4);
 
@@ -117,7 +114,6 @@ http.createServer(async (req, res) => {
 
     let oneDayAfter = new Date(offboardDate);
     oneDayAfter.setDate(offboardDate.getDate() + 1);
-    console.log("one day after " + oneDayAfter.toISOString());
 
     calendar.createEvent({
         allDay: true,
