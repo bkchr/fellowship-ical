@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "fmt": "pnpm exec prettier . --write",
+    "build": "tsc src/main.tsx",
     "execute": "pnpm esrun src/main.tsx",
     "postinstall": "papi",
     "update-types": "papi add fellowship -w wss://polkadot-collectives-rpc.polkadot.io && papi generate"

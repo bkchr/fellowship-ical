@@ -40,89 +40,78 @@ function blockToDate(block: number): Date {
     }
 }
 
-http.createServer(async (req, res) => {
-    res.writeHead(200, {
-        "Content-Type": "text/calendar; charset=utf-8",
-        "Content-Disposition": 'attachment; filename="calendar.ics"',
+const calendar = ical({ name: "Fellowship Calendar" });
+
+// get the value for an account
+const salaryStatus =
+    await fellowshipApi.query.FellowshipSalary.Status.getValue();
+let currentCycleStart = salaryStatus.cycle_start;
+const registrationPeriod =
+    await fellowshipApi.constants.FellowshipSalary.RegistrationPeriod();
+const payoutPeriod =
+    await fellowshipApi.constants.FellowshipSalary.PayoutPeriod();
+
+for (let cycle = 0; cycle < 12; cycle++) {
+    calendar.createEvent({
+        allDay: true,
+        start: blockToDate(currentCycleStart),
+        end: blockToDate(currentCycleStart + registrationPeriod),
+        summary: "Salary Registration",
     });
-
-    const calendar = ical({ name: "Fellowship Calendar" });
-
-    // get the value for an account
-    const salaryStatus =
-        await fellowshipApi.query.FellowshipSalary.Status.getValue();
-    let currentCycleStart = salaryStatus.cycle_start;
-    const registrationPeriod =
-        await fellowshipApi.constants.FellowshipSalary.RegistrationPeriod();
-    const payoutPeriod =
-        await fellowshipApi.constants.FellowshipSalary.PayoutPeriod();
-
-    for (let cycle = 0; cycle < 12; cycle++) {
-        calendar.createEvent({
-            allDay: true,
-            start: blockToDate(currentCycleStart),
-            end: blockToDate(currentCycleStart + registrationPeriod),
-            summary: "Salary Registration",
-        });
-
-        calendar.createEvent({
-            allDay: true,
-            start: blockToDate(currentCycleStart + registrationPeriod),
-            end: blockToDate(
-                currentCycleStart + registrationPeriod + payoutPeriod,
-            ),
-            summary: "Payout Registration",
-        });
-
-        currentCycleStart += registrationPeriod + payoutPeriod;
-    }
-
-    const [coreParams, memberStatus, memberRank] = await Promise.all([
-        fellowshipApi.query.FellowshipCore.Params.getValue(),
-        fellowshipApi.query.FellowshipCore.Member.getValue(
-            "13fvj4bNfrTo8oW6U8525soRp6vhjAFLum6XBdtqq9yP22E7",
-        ),
-        fellowshipApi.query.FellowshipCollective.Members.getValue(
-            "13fvj4bNfrTo8oW6U8525soRp6vhjAFLum6XBdtqq9yP22E7",
-        ),
-    ]);
-
-    let timeout;
-    let approachSummary;
-    let happenedSummary;
-
-    if (memberRank == 0) {
-        timeout = coreParams.offboard_timeout;
-        approachSummary = "Offboarding approaching";
-        happenedSummary = "Offboarded?";
-    } else {
-        timeout = coreParams.demotion_period[memberRank - 1];
-        approachSummary = "Demotion approaching";
-        happenedSummary = "Demoted?";
-    }
-
-    let offboardDate = blockToDate(memberStatus.last_proof + timeout);
-    let offboardEventStart = new Date(offboardDate);
-    offboardEventStart.setDate(offboardEventStart.getDate() - 7 * 4);
 
     calendar.createEvent({
         allDay: true,
-        start: offboardEventStart,
-        end: offboardDate,
-        summary: approachSummary,
+        start: blockToDate(currentCycleStart + registrationPeriod),
+        end: blockToDate(currentCycleStart + registrationPeriod + payoutPeriod),
+        summary: "Payout Registration",
     });
 
-    let oneDayAfter = new Date(offboardDate);
-    oneDayAfter.setDate(offboardDate.getDate() + 1);
+    currentCycleStart += registrationPeriod + payoutPeriod;
+}
 
-    calendar.createEvent({
-        allDay: true,
-        start: offboardDate,
-        end: oneDayAfter,
-        summary: happenedSummary,
-    });
+const [coreParams, memberStatus, memberRank] = await Promise.all([
+    fellowshipApi.query.FellowshipCore.Params.getValue(),
+    fellowshipApi.query.FellowshipCore.Member.getValue(
+        "13fvj4bNfrTo8oW6U8525soRp6vhjAFLum6XBdtqq9yP22E7",
+    ),
+    fellowshipApi.query.FellowshipCollective.Members.getValue(
+        "13fvj4bNfrTo8oW6U8525soRp6vhjAFLum6XBdtqq9yP22E7",
+    ),
+]);
 
-    res.end(calendar.toString());
-}).listen(3000, "127.0.0.1", () => {
-    console.log("Server running at http://127.0.0.1:3000/");
+let timeout;
+let approachSummary;
+let happenedSummary;
+
+if (memberRank == 0) {
+    timeout = coreParams.offboard_timeout;
+    approachSummary = "Offboarding approaching";
+    happenedSummary = "Offboarded?";
+} else {
+    timeout = coreParams.demotion_period[memberRank - 1];
+    approachSummary = "Demotion approaching";
+    happenedSummary = "Demoted?";
+}
+
+let offboardDate = blockToDate(memberStatus.last_proof + timeout);
+let offboardEventStart = new Date(offboardDate);
+offboardEventStart.setDate(offboardEventStart.getDate() - 7 * 4);
+
+calendar.createEvent({
+    allDay: true,
+    start: offboardEventStart,
+    end: offboardDate,
+    summary: approachSummary,
 });
+
+let oneDayAfter = new Date(offboardDate);
+oneDayAfter.setDate(offboardDate.getDate() + 1);
+
+calendar.createEvent({
+    allDay: true,
+    start: offboardDate,
+    end: oneDayAfter,
+    summary: happenedSummary,
+});
+
+document.body.textContent = calendar.toString();
