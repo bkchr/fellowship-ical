@@ -3,15 +3,35 @@ import { fellowship } from "@polkadot-api/descriptors";
 import { createClient } from "polkadot-api";
 import { getSmProvider } from "polkadot-api/sm-provider";
 import { chainSpec } from "polkadot-api/chains/polkadot_collectives";
-import { chainSpec as relayChainSpec } from "polkadot-api/chains/polkadot";
-import { start } from "polkadot-api/smoldot";
+import SmWorker from "polkadot-api/smoldot/worker?worker";
+import { startFromWorker } from "polkadot-api/smoldot/from-worker";
 
-const smoldot = start();
-const relayChain = await smoldot.addChain({ chainSpec: relayChainSpec });
-const chain = await smoldot.addChain({
-  chainSpec,
-  potentialRelayChains: [relayChain],
-});
+// Running smoldot in a web-worker has many advantages: the bundler
+// will create a separate "chunk" with the smoldot binaries (which are very heavy),
+// and the compilation of smoldot won't block the main process...
+// ie: faster loading times, plus smoldot will have a dedicated process.
+const smoldot = startFromWorker(new SmWorker());
+
+// this will make the bundler create a separate chunk for the polkadot
+// chainSpec (which is quite heavy) and it will load the chain without
+// blocking the rest of the tasks that can be ran in parallel
+const relayChainPromise = import("polkadot-api/chains/polkadot").then(
+  ({ chainSpec }) =>
+    smoldot.addChain({
+      chainSpec,
+      disableJsonRpc: true,
+    }),
+);
+
+// likewise: there is no need to "await" in here because the `getSmProvider`
+// accepts a `Promise<Chain>` so that the loading can happen in the background
+const chain = relayChainPromise.then((relayChain) =>
+  smoldot.addChain({
+    chainSpec,
+    potentialRelayChains: [relayChain],
+  }),
+);
+
 // Connect to the parachain
 const client = createClient(getSmProvider(chain));
 const finalizedBlock = await client.getFinalizedBlock();
