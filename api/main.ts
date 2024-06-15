@@ -3,8 +3,12 @@ import { fellowship } from "@polkadot-api/descriptors";
 import { createClient } from "polkadot-api";
 import { getSmProvider } from "polkadot-api/sm-provider";
 import { chainSpec } from "polkadot-api/chains/polkadot_collectives";
-import SmWorker from "polkadot-api/smoldot/worker?worker";
+import SmWorker from "polkadot-api/smoldot/worker";
 import { startFromWorker } from "polkadot-api/smoldot/from-worker";
+import type { VercelRequest, VercelResponse } from '@vercel/node'
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  const { name = 'World' } = req.query
 
 // Running smoldot in a web-worker has many advantages: the bundler
 // will create a separate "chunk" with the smoldot binaries (which are very heavy),
@@ -126,4 +130,7 @@ calendar.createEvent({
   summary: happenedSummary,
 });
 
-document.body.textContent = calendar.toString();
+  return res.json({
+    message: `Hello ${name}!`,
+  })
+}
