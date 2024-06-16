@@ -128,12 +128,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         summary: happenedSummary,
     });
 
-    let response = res.send(calendar.toString());
-    response.setHeader("Content-Type", "text/calendar; charset=utf-8");
-    response.setHeader(
-        "Content-Disposition",
-        'attachment; filename="calendar.ics"',
-    );
+    res.setHeader("Content-Type", "text/calendar; charset=utf-8");
+    res.setHeader("Content-Disposition", 'attachment; filename="calendar.ics"');
 
-    return response;
+    return res.send(calendar.toString());
 }
