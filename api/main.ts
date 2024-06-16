@@ -41,8 +41,6 @@ function blockToDate(block: number): Date {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-    const { name = "World" } = req.query;
-
     const calendar = ical({ name: "Fellowship Calendar" });
 
     // get the value for an account
@@ -50,7 +48,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         await fellowshipApi.query.FellowshipSalary.Status.getValue();
 
     if (salaryStatus == undefined) {
-        return res.json({});
+        return res.status(500).send("Could not query salary status");
     }
 
     let currentCycleStart = salaryStatus.cycle_start;
@@ -90,7 +88,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     ]);
 
     if (memberStatus == undefined || memberRank == undefined) {
-        return res.json({});
+        return res.status(500).send("Could not query member information");
     }
 
     let timeout;
