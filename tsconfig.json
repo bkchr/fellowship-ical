@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+      "target": "es2022",
+      "module": "nodenext",
+      "rootDir": "./api",
+      "lib": ["es2022"],
+      "strict": true,
+      "outDir": "./public",
+      "noImplicitAny": true,
+      "moduleResolution": "nodenext",
+      "strictNullChecks": true,
+      "strictFunctionTypes": true,
+      "strictBindCallApply": true,
+      "strictPropertyInitialization": true,
+      "skipLibCheck": true,
+      "noImplicitThis": true,
+      "alwaysStrict": true,
+      "esModuleInterop": true
+    }
+  }

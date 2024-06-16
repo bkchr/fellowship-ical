@@ -1,6 +1,10 @@
 {
   "name": "fellowship-ical",
   "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "papi && tsc"
+  },
   "dependencies": {
     "@vercel/node": "^3.1.7",
     "ical-generator": "^7.1.0",
