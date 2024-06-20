@@ -72,7 +72,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             allDay: true,
             start: blockToDate(currentCycleStart),
             end: blockToDate(currentCycleStart + registrationPeriod),
-            summary: "Salary Registration",
+            summary: "Salary registration",
         });
 
         calendar.createEvent({
@@ -81,7 +81,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             end: blockToDate(
                 currentCycleStart + registrationPeriod + payoutPeriod,
             ),
-            summary: "Payout Registration",
+            summary: "Claim salary",
         });
 
         currentCycleStart += registrationPeriod + payoutPeriod;
