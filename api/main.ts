@@ -48,7 +48,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (account == undefined || Array.isArray(account)) {
         return res
             .status(500)
-            .send("You need to pass exactly one `account` parameter");
+            .send(
+                "You need to pass exactly one `?account=ACCOUNT_ID` parameter",
+            );
     }
 
     // get the value for an account
@@ -88,9 +90,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const [coreParams, memberStatus, memberRank] = await Promise.all([
         fellowshipApi.query.FellowshipCore.Params.getValue(),
         fellowshipApi.query.FellowshipCore.Member.getValue(account),
-        fellowshipApi.query.FellowshipCollective.Members.getValue(
-            "13fvj4bNfrTo8oW6U8525soRp6vhjAFLum6XBdtqq9yP22E7",
-        ),
+        fellowshipApi.query.FellowshipCollective.Members.getValue(account),
     ]);
 
     if (memberStatus == undefined || memberRank == undefined) {
