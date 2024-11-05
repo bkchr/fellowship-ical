@@ -1,0 +1,10 @@
+{
+  "version": 0,
+  "descriptorPath": ".papi/descriptors",
+  "entries": {
+    "fellowship": {
+      "wsUrl": "wss://polkadot-collectives-rpc.polkadot.io",
+      "metadata": "fellowship.scale"
+    }
+  }
+}
