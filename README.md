@@ -6,6 +6,15 @@ A calendar for [Polkadot Fellowship](https://github.com/polkadot-fellows/) membe
 - Salary claim: The period in which the member can claim their salary in the current cycle.
 - Offboarding/Demotion approaching: One month before the member could be demoted/offboarded. So, the member is able to apply for retention.
 
+## Subscribing
+
+You can use the following url to subscribe to the calendar:
+```
+webcal://fellowship-calendar.kchr.de/?account=13fvj4bNfrTo8oW6U8525soRp6vhjAFLum6XBdtqq9yP22E7
+```
+
+`account=` needs to be changed to be changed to YOUR account. If the account is not part of the fellowship, it will fail.
+
 ## Development
 
 First install dependencies:
