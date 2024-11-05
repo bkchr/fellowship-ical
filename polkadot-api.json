@@ -1,6 +1,0 @@
-{
-  "fellowship": {
-    "wsUrl": "wss://polkadot-collectives-rpc.polkadot.io",
-    "metadata": "fellowship.scale"
-  }
-}
