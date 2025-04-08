@@ -4,7 +4,8 @@
   "entries": {
     "fellowship": {
       "wsUrl": "wss://polkadot-collectives-rpc.polkadot.io",
-      "metadata": "fellowship.scale"
+      "metadata": "fellowship.scale",
+      "genesis": "0x46ee89aa2eedd13e988962630ec9fb7565964cf5023bb351f2b6b25c1b68b0b2"
     }
   }
 }

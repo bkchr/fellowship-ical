@@ -5,7 +5,6 @@ import { getSmProvider } from "polkadot-api/sm-provider";
 import { chainSpec } from "polkadot-api/chains/polkadot_collectives";
 import { chainSpec as relayChainSpec } from "polkadot-api/chains/polkadot";
 import { start } from "polkadot-api/smoldot";
-import { timeStamp } from "console";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 const smoldot = start();

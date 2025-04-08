@@ -36,3 +36,15 @@ Running a dev server:
 ```sh
 vercel dev
 ```
+
+## Deploy
+
+Install `vercel`:
+```sh
+pnpm i -g vercel
+```
+
+Deploying it:
+```sh
+vercel --prod
+```
