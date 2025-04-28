@@ -13,25 +13,27 @@ jobs:
 
 
       - name: Wait for Vercel Preview
-        uses: patrickedqvist/wait-for-vercel-preview@d0c786948cbb91d3a92fdfff2829e9066c232330
         id: waitPreview
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          vercel_protection_bypass_header: ${{ env.VERCEL_PREVIEW_BYPASS_AUTH }}
-          max_timeout: 120
+        run: |
+          for i in $(seq 1 60); do
+            resp=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/${{ github.repository }}/deployments?ref=${{ github.event.pull_request.head.sha }}")
+            url=$(echo "$resp" | jq -r '.[0].payload.web_url // empty')
+            if [ -n "$url" ]; then
+              echo "::set-output name=url::$url"
+              break
+            fi
+            sleep 2
+          done
+          if [ -z "$url" ]; then echo "Preview URL not found"; exit 1; fi
 
       - name: Ensure ICAL response
         run: |
           URL="${{ steps.waitPreview.outputs.url }}/?account=13fvj4bNfrTo8oW6U8525soRp6vhjAFLum6XBdtqq9yP22E7"
           echo "Testing $URL"
-          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
-          if [ "$STATUS_CODE" -ne 200 ]; then
-            echo "Expected HTTP 200, got $STATUS_CODE"
-            exit 1
-          fi
-          CONTENT_TYPE=$(curl -s -I "$URL" | grep -i '^content-type:' | awk '{print $2}' | tr -d '\r')
+          CONTENT_TYPE=$(curl -s -I -H "x-vercel-protection-bypass: ${{ env.VERCEL_PREVIEW_BYPASS_AUTH }}" "$URL" | grep -i '^content-type:' | awk '{print $2}' | tr -d '\r')
           if [[ "$CONTENT_TYPE" != text/calendar* ]]; then
             echo "Expected Content-Type text/calendar, got $CONTENT_TYPE"
             exit 1
           fi
-          curl -s "$URL" | head -n1 | grep -q "^BEGIN:VCALENDAR" || { echo "Response is not a valid iCal file"; exit 1; }
+          curl -s -H "x-vercel-protection-bypass: ${{ env.VERCEL_PREVIEW_BYPASS_AUTH }}" "$URL" | head -n1 | grep -q "^BEGIN:VCALENDAR" || { echo "Response is not a valid iCal file"; exit 1; }
