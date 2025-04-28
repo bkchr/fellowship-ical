@@ -1,0 +1,37 @@
+name: Validate Staging Preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  test-staging:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy to Vercel Preview
+        uses: amondnet/vercel-action@v20
+        id: vercel
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: "--prebuilt"
+
+      - name: Ensure ICAL response
+        run: |
+          URL="${{ steps.vercel.outputs.preview-url }}/?account=13fvj4bNfrTo8oW6U8525soRp6vhjAFLum6XBdtqq9yP22E7"
+          echo "Testing $URL"
+          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+          if [ "$STATUS_CODE" -ne 200 ]; then
+            echo "Expected HTTP 200, got $STATUS_CODE"
+            exit 1
+          fi
+          CONTENT_TYPE=$(curl -s -I "$URL" | grep -i '^content-type:' | awk '{print $2}' | tr -d '\r')
+          if [[ "$CONTENT_TYPE" != text/calendar* ]]; then
+            echo "Expected Content-Type text/calendar, got $CONTENT_TYPE"
+            exit 1
+          fi
+          curl -s "$URL" | head -n1 | grep -q "^BEGIN:VCALENDAR" || { echo "Response is not a valid iCal file"; exit 1; }
