@@ -17,6 +17,7 @@ jobs:
         id: waitPreview
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          vercel_protection_bypass_secret: ${{ env.VERCEL_PREVIEW_BYPASS_AUTH }}
 
       - name: Ensure ICAL response
         run: |
