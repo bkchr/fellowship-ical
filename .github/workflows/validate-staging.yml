@@ -13,7 +13,7 @@ jobs:
 
 
       - name: Wait for Vercel Preview
-        uses: patrickedqvist/wait-for-vercel-preview@v1.3.2
+        uses: patrickedqvist/wait-for-vercel-preview@d0c786948cbb91d3a92fdfff2829e9066c232330
         id: waitPreview
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
