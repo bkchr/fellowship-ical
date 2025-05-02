@@ -108,11 +108,10 @@ jobs:
             exit 1
           fi
 
-          # Extract headers (everything before the first empty line)
-          HEADERS=$(echo "$FULL_RESPONSE" | sed '/^\r?$/q')
-          # Extract body (everything after the first empty line)
-          # Use sed '1,/^\r?$/d' to delete lines from 1 up to the first empty line
-          ICAL_CONTENT=$(echo "$FULL_RESPONSE" | sed '1,/^\r?$/d')
+          # Extract headers (first block separated by blank line)
+          HEADERS=$(echo "$FULL_RESPONSE" | awk 'BEGIN{RS=""} NR==1 {print; exit}')
+          # Extract body (second block separated by blank line)
+          ICAL_CONTENT=$(echo "$FULL_RESPONSE" | awk 'BEGIN{RS=""} NR==2 {print; exit}')
 
           # Check Content-Type header
           CONTENT_TYPE=$(echo "$HEADERS" | grep -i '^content-type:' | awk '{print $2}' | tr -d '\r')
