@@ -7,33 +7,100 @@ on:
 jobs:
   test-staging:
     runs-on: ubuntu-latest
+    # Grant permission to read deployment statuses
+    permissions:
+      deployments: read
+    env:
+      VERCEL_PREVIEW_BYPASS_AUTH: ${{ vars.VERCEL_PREVIEW_BYPASS_AUTH }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Wait for GitHub Deployment Status
+        id: waitDeployment
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const sha = context.sha;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            let deploymentUrl = '';
 
-      - name: Wait for Vercel Preview
-        id: waitPreview
-        run: |
-          for i in $(seq 1 60); do
-            resp=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-              "https://api.github.com/repos/${{ github.repository }}/deployments?ref=${{ github.event.pull_request.head.sha }}")
-            url=$(echo "$resp" | jq -r '.[0].payload.web_url // empty')
-            if [ -n "$url" ]; then
-              echo "::set-output name=url::$url"
-              break
-            fi
-            sleep 2
-          done
-          if [ -z "$url" ]; then echo "Preview URL not found"; exit 1; fi
+            for (let i = 0; i < 60; i++) { // Loop for ~5 minutes (60 * 5s)
+              console.log(`Attempt ${i + 1}: Checking deployments for SHA ${sha}...`);
+              // Use github.rest (Octokit) provided by github-script
+              const { data: deployments } = await github.rest.repos.listDeployments({
+                owner,
+                repo,
+                sha,
+              });
+
+              if (deployments.length === 0) {
+                console.log('No deployments found yet.');
+              } else {
+                // Vercel usually creates one deployment per commit for preview
+                // Find the most recent deployment if multiple exist
+                const deployment = deployments.sort((a,b) => new Date(b.created_at) - new Date(a.created_at))[0];
+                console.log(`Found deployment ID: ${deployment.id}. Checking statuses...`);
+
+                const { data: statuses } = await github.rest.repos.listDeploymentStatuses({
+                  owner,
+                  repo,
+                  deployment_id: deployment.id,
+                  per_page: 5, // Check recent statuses
+                });
+
+                // Find the latest successful status with an environment_url
+                const successStatus = statuses
+                  .filter(status => status.state === 'success' && status.environment_url)
+                  .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0]; // Get the latest
+
+                if (successStatus) {
+                  deploymentUrl = successStatus.environment_url;
+                  console.log(`Success status found with URL: ${deploymentUrl}`);
+                  break; // Exit loop
+                } else {
+                  console.log(`No successful deployment status with URL found yet. Latest state: ${statuses[0]?.state}`);
+                }
+              }
+
+              if (deploymentUrl) break; // Exit outer loop if URL found
+
+              console.log('Waiting 5 seconds before next check...');
+              await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
+            }
+
+            if (!deploymentUrl) {
+              core.setFailed(`Failed to get deployment URL from GitHub Deployment status for SHA ${sha} after multiple attempts.`);
+              return;
+            }
+
+            // Ensure URL starts with https:// (Vercel URLs should, but good practice)
+            if (!deploymentUrl.startsWith('https://')) {
+               deploymentUrl = 'https://' + deploymentUrl;
+            }
+            core.setOutput('url', deploymentUrl);
+            console.log(`Outputting URL: ${deploymentUrl}`);
 
       - name: Ensure ICAL response
+        env:
+          PREVIEW_URL: ${{ steps.waitDeployment.outputs.url }}
         run: |
-          URL="${{ steps.waitPreview.outputs.url }}/?account=13fvj4bNfrTo8oW6U8525soRp6vhjAFLum6XBdtqq9yP22E7"
-          echo "Testing $URL"
-          CONTENT_TYPE=$(curl -s -I -H "x-vercel-protection-bypass: ${{ env.VERCEL_PREVIEW_BYPASS_AUTH }}" "$URL" | grep -i '^content-type:' | awk '{print $2}' | tr -d '\r')
-          if [[ "$CONTENT_TYPE" != text/calendar* ]]; then
-            echo "Expected Content-Type text/calendar, got $CONTENT_TYPE"
+          # Ensure PREVIEW_URL is set
+          if [ -z "$PREVIEW_URL" ]; then
+            echo "Error: PREVIEW_URL is empty. Deployment URL was not correctly passed from previous step."
             exit 1
           fi
-          curl -s -H "x-vercel-protection-bypass: ${{ env.VERCEL_PREVIEW_BYPASS_AUTH }}" "$URL" | head -n1 | grep -q "^BEGIN:VCALENDAR" || { echo "Response is not a valid iCal file"; exit 1; }
+          URL="$PREVIEW_URL/?account=13fvj4bNfrTo8oW6U8525soRp6vhjAFLum6XBdtqq9yP22E7"
+          echo "Testing $URL"
+          # Use -L to follow redirects, which Vercel previews often use initially
+          # Use --fail to make curl exit with an error code on HTTP errors (like 4xx, 5xx)
+          CONTENT_TYPE=$(curl -s -L --fail -I -H "x-vercel-protection-bypass: ${{ env.VERCEL_PREVIEW_BYPASS_AUTH }}" "$URL" | grep -i '^content-type:' | awk '{print $2}' | tr -d '\r')
+          if [[ "$CONTENT_TYPE" != text/calendar* ]]; then
+            echo "Expected Content-Type 'text/calendar', got '$CONTENT_TYPE'"
+            exit 1
+          fi
+          echo "Content-Type check passed."
+          # Use -L to follow redirects and --fail for error checking
+          curl -s -L --fail -H "x-vercel-protection-bypass: ${{ env.VERCEL_PREVIEW_BYPASS_AUTH }}" "$URL" | head -n1 | grep -q "^BEGIN:VCALENDAR" || { echo "Response body does not start with BEGIN:VCALENDAR"; exit 1; }
+          echo "iCal content check passed."
