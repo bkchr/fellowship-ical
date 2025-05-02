@@ -126,6 +126,9 @@ jobs:
           fi
           echo "Content-Type check passed."
 
+          echo "Content:"
+          echo "$ICAL_CONTENT";
+
           # Check if the body starts with BEGIN:VCALENDAR
           echo "$ICAL_CONTENT" | head -n1 | grep -q "^BEGIN:VCALENDAR" || { echo "Response body does not start with BEGIN:VCALENDAR"; exit 1; }
           echo "BEGIN:VCALENDAR check passed."
