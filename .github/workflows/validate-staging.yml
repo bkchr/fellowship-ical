@@ -21,7 +21,8 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const sha = context.sha;
+            // Use the head commit SHA of the pull request branch
+            const sha = context.payload.pull_request.head.sha;
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             let deploymentUrl = '';
