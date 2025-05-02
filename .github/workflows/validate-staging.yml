@@ -94,14 +94,50 @@ jobs:
           fi
           URL="$PREVIEW_URL/?account=13fvj4bNfrTo8oW6U8525soRp6vhjAFLum6XBdtqq9yP22E7"
           echo "Testing $URL"
-          # Use -L to follow redirects, which Vercel previews often use initially
-          # Use --fail to make curl exit with an error code on HTTP errors (like 4xx, 5xx)
-          CONTENT_TYPE=$(curl -s -L --fail -I -H "x-vercel-protection-bypass: ${{ env.VERCEL_PREVIEW_BYPASS_AUTH }}" "$URL" | grep -i '^content-type:' | awk '{print $2}' | tr -d '\r')
+
+          # Download the full response (headers + body) once
+          # Use -i to include headers in the output
+          FULL_RESPONSE=$(curl -s -L --fail -i -H "x-vercel-protection-bypass: ${{ env.VERCEL_PREVIEW_BYPASS_AUTH }}" "$URL")
+          CURL_EXIT_CODE=$?
+
+          if [ $CURL_EXIT_CODE -ne 0 ]; then
+            echo "Error: curl command failed with exit code $CURL_EXIT_CODE when fetching $URL"
+            # Optionally print the response for debugging if curl failed but still produced output
+            # echo "Response received before failure:"
+            # echo "$FULL_RESPONSE"
+            exit 1
+          fi
+
+          # Extract headers (everything before the first empty line)
+          HEADERS=$(echo "$FULL_RESPONSE" | sed '/^\r?$/q')
+          # Extract body (everything after the first empty line)
+          # Use sed '1,/^\r?$/d' to delete lines from 1 up to the first empty line
+          ICAL_CONTENT=$(echo "$FULL_RESPONSE" | sed '1,/^\r?$/d')
+
+          # Check Content-Type header
+          CONTENT_TYPE=$(echo "$HEADERS" | grep -i '^content-type:' | awk '{print $2}' | tr -d '\r')
           if [[ "$CONTENT_TYPE" != text/calendar* ]]; then
             echo "Expected Content-Type 'text/calendar', got '$CONTENT_TYPE'"
+            echo "--- Headers ---"
+            echo "$HEADERS"
+            echo "--- Body ---"
+            echo "$ICAL_CONTENT" # Print body for context on error
             exit 1
           fi
           echo "Content-Type check passed."
-          # Use -L to follow redirects and --fail for error checking
-          curl -s -L --fail -H "x-vercel-protection-bypass: ${{ env.VERCEL_PREVIEW_BYPASS_AUTH }}" "$URL" | head -n1 | grep -q "^BEGIN:VCALENDAR" || { echo "Response body does not start with BEGIN:VCALENDAR"; exit 1; }
-          echo "iCal content check passed."
+
+          # Check if the body starts with BEGIN:VCALENDAR
+          echo "$ICAL_CONTENT" | head -n1 | grep -q "^BEGIN:VCALENDAR" || { echo "Response body does not start with BEGIN:VCALENDAR"; exit 1; }
+          echo "BEGIN:VCALENDAR check passed."
+
+          # Check for required event summaries in the body
+          echo "$ICAL_CONTENT" | grep -q "^SUMMARY:Claim salary" || { echo "Error: Missing 'Claim salary' event summary."; exit 1; }
+          echo "Found 'Claim salary' event."
+
+          echo "$ICAL_CONTENT" | grep -q "^SUMMARY:Salary registration" || { echo "Error: Missing 'Salary registration' event summary."; exit 1; }
+          echo "Found 'Salary registration' event."
+
+          echo "$ICAL_CONTENT" | grep -q "^SUMMARY:Demotion approaching" || { echo "Error: Missing 'Demotion approaching' event summary."; exit 1; }
+          echo "Found 'Demotion approaching' event."
+
+          echo "All required iCal content checks passed."
