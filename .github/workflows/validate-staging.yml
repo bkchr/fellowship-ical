@@ -136,8 +136,8 @@ jobs:
           fi
 
           echo "Content fetched successfully. Validating..."
-          # echo "Content:" # Optional: uncomment to print full content for debugging
-          # echo "$ICAL_CONTENT";
+          echo "Content:" # Optional: uncomment to print full content for debugging
+          echo "$ICAL_CONTENT";
 
           # Check if the body starts with BEGIN:VCALENDAR
           echo "$ICAL_CONTENT" | head -n1 | grep -q "^BEGIN:VCALENDAR" || { echo "Response body does not start with BEGIN:VCALENDAR"; echo "--- Body ---"; echo "$ICAL_CONTENT"; exit 1; }
