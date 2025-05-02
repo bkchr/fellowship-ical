@@ -95,41 +95,52 @@ jobs:
           URL="$PREVIEW_URL/?account=13fvj4bNfrTo8oW6U8525soRp6vhjAFLum6XBdtqq9yP22E7"
           echo "Testing $URL"
 
-          # Download the full response (headers + body) once
-          # Use -i to include headers in the output
-          FULL_RESPONSE=$(curl -s -L --fail -i -H "x-vercel-protection-bypass: ${{ env.VERCEL_PREVIEW_BYPASS_AUTH }}" "$URL")
-          CURL_EXIT_CODE=$?
+          # --- Check Content-Type using curl -I ---
+          echo "Fetching headers..."
+          HEADERS_OUTPUT=$(curl -s -L --fail -I -H "x-vercel-protection-bypass: ${{ env.VERCEL_PREVIEW_BYPASS_AUTH }}" "$URL")
+          CURL_HEADERS_EXIT_CODE=$?
 
-          if [ $CURL_EXIT_CODE -ne 0 ]; then
-            echo "Error: curl command failed with exit code $CURL_EXIT_CODE when fetching $URL"
-            # Optionally print the response for debugging if curl failed but still produced output
-            # echo "Response received before failure:"
-            # echo "$FULL_RESPONSE"
+          if [ $CURL_HEADERS_EXIT_CODE -ne 0 ]; then
+            echo "Error: curl (headers) command failed with exit code $CURL_HEADERS_EXIT_CODE when fetching $URL"
+            echo "--- Headers Output ---"
+            echo "$HEADERS_OUTPUT"
             exit 1
           fi
 
-          # Extract headers (first block separated by blank line)
-          HEADERS=$(echo "$FULL_RESPONSE" | awk 'BEGIN{RS=""} NR==1 {print; exit}')
-          # Extract body (second block separated by blank line)
-          ICAL_CONTENT=$(echo "$FULL_RESPONSE" | awk 'BEGIN{RS=""} NR==2 {print; exit}')
-
-          # Check Content-Type header
-          CONTENT_TYPE=$(echo "$HEADERS" | grep -i '^content-type:' | awk '{print $2}' | tr -d '\r')
+          CONTENT_TYPE=$(echo "$HEADERS_OUTPUT" | grep -i '^content-type:' | awk '{print $2}' | tr -d '\r')
           if [[ "$CONTENT_TYPE" != text/calendar* ]]; then
             echo "Expected Content-Type 'text/calendar', got '$CONTENT_TYPE'"
-            echo "--- Headers ---"
-            echo "$HEADERS"
-            echo "--- Body ---"
-            echo "$ICAL_CONTENT" # Print body for context on error
+            echo "--- Headers Output ---"
+            echo "$HEADERS_OUTPUT"
             exit 1
           fi
           echo "Content-Type check passed."
 
-          echo "Content:"
-          echo "$ICAL_CONTENT";
+          # --- Fetch Body Content and Validate ---
+          echo "Fetching body content..."
+          ICAL_CONTENT=$(curl -s -L --fail -H "x-vercel-protection-bypass: ${{ env.VERCEL_PREVIEW_BYPASS_AUTH }}" "$URL")
+          CURL_BODY_EXIT_CODE=$?
+
+          if [ $CURL_BODY_EXIT_CODE -ne 0 ]; then
+            echo "Error: curl (body) command failed with exit code $CURL_BODY_EXIT_CODE when fetching $URL"
+            # Body might be empty or partial on failure, print for debugging
+            echo "--- Body Output (if any) ---"
+            echo "$ICAL_CONTENT"
+            exit 1
+          fi
+
+          # Check if the body is empty
+          if [ -z "$ICAL_CONTENT" ]; then
+            echo "Error: Fetched iCal content is empty."
+            exit 1
+          fi
+
+          echo "Content fetched successfully. Validating..."
+          # echo "Content:" # Optional: uncomment to print full content for debugging
+          # echo "$ICAL_CONTENT";
 
           # Check if the body starts with BEGIN:VCALENDAR
-          echo "$ICAL_CONTENT" | head -n1 | grep -q "^BEGIN:VCALENDAR" || { echo "Response body does not start with BEGIN:VCALENDAR"; exit 1; }
+          echo "$ICAL_CONTENT" | head -n1 | grep -q "^BEGIN:VCALENDAR" || { echo "Response body does not start with BEGIN:VCALENDAR"; echo "--- Body ---"; echo "$ICAL_CONTENT"; exit 1; }
           echo "BEGIN:VCALENDAR check passed."
 
           # Check for required event summaries in the body
