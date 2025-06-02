@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@polkadot-api/descriptors": "file:.papi/descriptors",
-    "@vercel/node": "^5.1.16",
+    "@vercel/node": "^5.2.1",
     "ical-generator": "^9.0.0",
     "polkadot-api": "^1.13.0"
   },
