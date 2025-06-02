@@ -16,14 +16,14 @@ importers:
         version: 5.2.1(rollup@4.41.1)
       ical-generator:
         specifier: ^9.0.0
-        version: 9.0.0(@types/node@22.15.21)
+        version: 9.0.0(@types/node@22.15.29)
       polkadot-api:
         specifier: ^1.13.0
         version: 1.13.0(postcss@8.5.3)(rxjs@7.8.2)(yaml@2.7.1)
     devDependencies:
       '@types/node':
-        specifier: ^22.15.21
-        version: 22.15.21
+        specifier: ^22.15.29
+        version: 22.15.29
       prettier:
         specifier: 3.5.3
         version: 3.5.3
@@ -505,9 +505,6 @@ packages:
 
   '@types/node@16.18.11':
     resolution: {integrity: sha512-3oJbGBUWuS6ahSnEq1eN2XrCyf4YsWI8OyCvo7c64zQJNplk3mO84t53o8lfTk+2ji59g5ycfc6qQ3fdHliHuA==}
-
-  '@types/node@22.15.21':
-    resolution: {integrity: sha512-EV/37Td6c+MgKAbkcLG6vqZ2zEYHD7bvSrzqqs2RIhbA6w3x+Dqz8MZM3sP6kGTeLrdoOgKZe+Xja7tUB2DNkQ==}
 
   '@types/node@22.15.29':
     resolution: {integrity: sha512-LNdjOkUDlU1RZb8e1kOIUpN1qQUlzGkEtbVNo53vbrwDg5om6oduhm4SiUaPW5ASTXhAiP0jInWG8Qx9fVlOeQ==}
@@ -2007,10 +2004,6 @@ snapshots:
 
   '@types/node@16.18.11': {}
 
-  '@types/node@22.15.21':
-    dependencies:
-      undici-types: 6.21.0
-
   '@types/node@22.15.29':
     dependencies:
       undici-types: 6.21.0
@@ -2430,9 +2423,9 @@ snapshots:
 
   human-signals@8.0.1: {}
 
-  ical-generator@9.0.0(@types/node@22.15.21):
+  ical-generator@9.0.0(@types/node@22.15.29):
     optionalDependencies:
-      '@types/node': 22.15.21
+      '@types/node': 22.15.29
 
   imurmurhash@0.1.4: {}
 
