@@ -16,14 +16,14 @@ importers:
         version: 5.2.1(rollup@4.41.1)
       ical-generator:
         specifier: ^9.0.0
-        version: 9.0.0(@types/node@22.15.29)
+        version: 9.0.0(@types/node@22.15.30)
       polkadot-api:
         specifier: ^1.13.0
         version: 1.13.0(postcss@8.5.3)(rxjs@7.8.2)(yaml@2.7.1)
     devDependencies:
       '@types/node':
-        specifier: ^22.15.29
-        version: 22.15.29
+        specifier: ^22.15.30
+        version: 22.15.30
       prettier:
         specifier: 3.5.3
         version: 3.5.3
@@ -506,8 +506,8 @@ packages:
   '@types/node@16.18.11':
     resolution: {integrity: sha512-3oJbGBUWuS6ahSnEq1eN2XrCyf4YsWI8OyCvo7c64zQJNplk3mO84t53o8lfTk+2ji59g5ycfc6qQ3fdHliHuA==}
 
-  '@types/node@22.15.29':
-    resolution: {integrity: sha512-LNdjOkUDlU1RZb8e1kOIUpN1qQUlzGkEtbVNo53vbrwDg5om6oduhm4SiUaPW5ASTXhAiP0jInWG8Qx9fVlOeQ==}
+  '@types/node@22.15.30':
+    resolution: {integrity: sha512-6Q7lr06bEHdlfplU6YRbgG1SFBdlsfNC4/lX+SkhiTs0cpJkOElmWls8PxDFv4yY/xKb8Y6SO0OmSX4wgqTZbA==}
 
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
@@ -1762,7 +1762,7 @@ snapshots:
       '@polkadot-api/utils': 0.2.0
       '@polkadot-api/wasm-executor': 0.1.2
       '@polkadot-api/ws-provider': 0.4.0
-      '@types/node': 22.15.29
+      '@types/node': 22.15.30
       commander: 14.0.0
       execa: 9.6.0
       fs.promises.exists: 1.1.4
@@ -1874,7 +1874,7 @@ snapshots:
 
   '@polkadot-api/smoldot@0.3.9':
     dependencies:
-      '@types/node': 22.15.29
+      '@types/node': 22.15.30
       smoldot: 2.0.35
     transitivePeerDependencies:
       - bufferutil
@@ -2004,7 +2004,7 @@ snapshots:
 
   '@types/node@16.18.11': {}
 
-  '@types/node@22.15.29':
+  '@types/node@22.15.30':
     dependencies:
       undici-types: 6.21.0
 
@@ -2423,9 +2423,9 @@ snapshots:
 
   human-signals@8.0.1: {}
 
-  ical-generator@9.0.0(@types/node@22.15.29):
+  ical-generator@9.0.0(@types/node@22.15.30):
     optionalDependencies:
-      '@types/node': 22.15.29
+      '@types/node': 22.15.30
 
   imurmurhash@0.1.4: {}
 
