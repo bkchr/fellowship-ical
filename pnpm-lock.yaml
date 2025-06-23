@@ -12,8 +12,8 @@ importers:
         specifier: file:.papi/descriptors
         version: file:.papi/descriptors(polkadot-api@1.14.1(postcss@8.5.3)(rxjs@7.8.2)(yaml@2.7.1))
       '@vercel/node':
-        specifier: ^5.2.2
-        version: 5.2.2(rollup@4.44.0)
+        specifier: ^5.3.0
+        version: 5.3.0(rollup@4.44.0)
       ical-generator:
         specifier: ^9.0.0
         version: 9.0.0(@types/node@24.0.3)
@@ -358,8 +358,8 @@ packages:
   '@polkadot-api/ws-provider@0.4.0':
     resolution: {integrity: sha512-ZurjUHHAlQ1Ux8HiZz7mtkg1qjq6LmqxcHljcZxne0U7foCZrXdWHsohwlV8kUQUir5kXuDsNvdZN/MFCUMaVw==}
 
-  '@rollup/pluginutils@5.1.4':
-    resolution: {integrity: sha512-USm05zrsFxYLPdWWq+K3STlWiT/3ELn3RcV5hJMghpeAIhxfsUIg6mt12CBJBInWMV4VneoV7SfGv8xIwo2qNQ==}
+  '@rollup/pluginutils@5.2.0':
+    resolution: {integrity: sha512-qWJ2ZTbmumwiLFomfzTyt5Kng4hwPi9rwCYN4SHb6eaRU1KNO4ccxINHr/VhH4GgPlt1XfSTLX2LBTme8ne4Zw==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
       rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
@@ -526,8 +526,8 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
-  '@vercel/node@5.2.2':
-    resolution: {integrity: sha512-BcpCn6NVLBBWDSKUVCMmmM1mUoYttGwWIuOL8HpF2AbOnx1NzUTlrR6pvBLxs403DIjEfPzqgYHLxITg85oi7w==}
+  '@vercel/node@5.3.0':
+    resolution: {integrity: sha512-NeE5c7dRt9PXUzq7zUA+rj94l7AoXBw2cE+xK0hIoYDcWbIJVYBhbkBtzNdZx8CGncUJ2wMq01gn8pCwoQ0xYA==}
 
   '@vercel/static-config@3.1.1':
     resolution: {integrity: sha512-IRtKnm9N1Uqd2ayIbLPjRtdwcl1GTWvqF1PuEVNm9O43kmoI+m9VpGlW8oga+5LQq1LmJ2Y67zHr7NbjrH1rrw==}
@@ -1911,7 +1911,7 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@rollup/pluginutils@5.1.4(rollup@4.44.0)':
+  '@rollup/pluginutils@5.2.0(rollup@4.44.0)':
     dependencies:
       '@types/estree': 1.0.8
       estree-walker: 2.0.2
@@ -2027,7 +2027,7 @@ snapshots:
   '@vercel/nft@0.29.2(rollup@4.44.0)':
     dependencies:
       '@mapbox/node-pre-gyp': 2.0.0
-      '@rollup/pluginutils': 5.1.4(rollup@4.44.0)
+      '@rollup/pluginutils': 5.2.0(rollup@4.44.0)
       acorn: 8.15.0
       acorn-import-attributes: 1.9.5(acorn@8.15.0)
       async-sema: 3.1.1
@@ -2043,7 +2043,7 @@ snapshots:
       - rollup
       - supports-color
 
-  '@vercel/node@5.2.2(rollup@4.44.0)':
+  '@vercel/node@5.3.0(rollup@4.44.0)':
     dependencies:
       '@edge-runtime/node-utils': 2.3.0
       '@edge-runtime/primitives': 4.1.0
