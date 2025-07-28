@@ -10,7 +10,7 @@
     "@polkadot-api/descriptors": "file:.papi/descriptors",
     "@vercel/node": "^5.3.5",
     "ical-generator": "^9.0.0",
-    "polkadot-api": "^1.14.1"
+    "polkadot-api": "^1.15.1"
   },
   "devDependencies": {
     "@types/node": "^24.0.13",
